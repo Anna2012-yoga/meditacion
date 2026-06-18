@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Спокій</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}html,body{height:100%}
+body{font-family:'Nunito','Arial Rounded MT Bold',sans-serif;background:radial-gradient(ellipse at 25% 20%,#1e5c30 0%,#0e3d1a 45%,#091f0e 100%);color:#e8f4f0;height:100vh;overflow:hidden;}
+body::before{content:'';position:fixed;width:550px;height:550px;border-radius:50%;background:radial-gradient(circle,rgba(50,140,80,0.28),transparent 68%);top:-160px;right:-160px;pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;width:450px;height:450px;border-radius:50%;background:radial-gradient(circle,rgba(20,90,45,0.22),transparent 68%);bottom:-140px;left:-140px;pointer-events:none;z-index:0}
+#bg{position:fixed;top:0;left:0;z-index:0;pointer-events:none}
+.app{position:relative;z-index:1;display:flex;flex-direction:column;width:100%;height:100%;max-width:520px;margin:0 auto;padding:10px 16px 14px;gap:6px}
+.lbar{display:flex;gap:6px;justify-content:center;flex-shrink:0}
+.lb{padding:4px 14px;border-radius:20px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:rgba(168,213,194,0.6);cursor:pointer;font-size:11px;font-weight:700;transition:all .2s;letter-spacing:.5px;}
+.lb.on{background:rgba(126,184,164,0.88);color:#071910;border-color:rgba(168,213,194,0.4);box-shadow:0 4px 14px rgba(126,184,164,0.45),inset 0 1px 0 rgba(255,255,255,0.25);}
+.app-nm{font-size:20px;letter-spacing:6px;color:#b8e0d0;text-align:center;flex-shrink:0;font-weight:800;text-shadow:0 2px 12px rgba(126,184,164,0.3)}
+.spill{font-size:13px;color:#d4a853;text-align:center;flex-shrink:0;font-weight:700}
+.qbox{text-align:center;padding:10px 16px;background:rgba(255,255,255,0.06);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.13);border-radius:22px;flex-shrink:0;box-shadow:0 8px 32px rgba(0,0,0,0.18),inset 0 1px 0 rgba(255,255,255,0.09);}
+.qt{font-size:12.5px;line-height:1.6;font-style:italic;margin-bottom:3px;font-family:'Georgia',serif}
+.qa{font-size:11px;color:#7eb8a0;font-weight:600}
+.sa{flex-shrink:0}
+.og{margin-bottom:6px}
+.ol{font-size:9.5px;color:#7eb8a0;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;font-weight:700;text-align:center}
+.chips{display:flex;gap:5px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:5px}
+.chip{padding:7px 12px;border-radius:50px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:rgba(168,213,194,0.65);cursor:pointer;font-size:11.5px;font-weight:600;transition:all .18s;user-select:none;white-space:nowrap;text-align:center;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.12);}
+.chip.on{background:rgba(126,184,164,0.82);color:#071910;border-color:rgba(168,213,194,0.35);font-weight:700;box-shadow:0 4px 16px rgba(126,184,164,0.42),inset 0 1px 0 rgba(255,255,255,0.22);}
+.chip:hover:not(.on){background:rgba(255,255,255,0.1);border-color:rgba(126,184,164,0.3);color:#b8e0d0}
+.sta{display:none;grid-template-columns:repeat(4,1fr);gap:7px;flex-shrink:0}
+.stat{background:rgba(255,255,255,0.06);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,0.11);border-radius:18px;padding:10px 4px;text-align:center;box-shadow:0 4px 18px rgba(0,0,0,0.14),inset 0 1px 0 rgba(255,255,255,0.08);}
+.sv{font-size:18px;color:#d4a853;margin-bottom:3px;font-weight:800}
+.sl{font-size:9px;color:#7eb8a0;letter-spacing:1px;font-weight:700}
+.smsg{text-align:center;font-size:12px;color:#d4a853;display:none;flex-shrink:0;min-height:16px;font-weight:700}
+.cwrap{position:relative;display:inline-block}
+.ctext{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;width:120px}
+.ph-nm{font-size:12px;letter-spacing:3px;font-weight:800;margin-bottom:1px;transition:color .35s}
+.ph-ct{font-size:36px;letter-spacing:1px;line-height:1.05;transition:color .35s;font-weight:800}
+.snd-l{font-size:9px;color:#7eb8a0;letter-spacing:1px;margin-top:2px;font-weight:600}
+.sess-l{font-size:13px;color:rgba(168,213,194,0.5);letter-spacing:1px;font-weight:600}
+.btn{padding:12px 32px;background:linear-gradient(160deg,#9ad4be 0%,#52a88c 45%,#3a8f73 100%);border:none;border-radius:50px;color:#071910;font-size:13px;font-weight:800;letter-spacing:1.5px;cursor:pointer;box-shadow:0 7px 22px rgba(60,150,110,0.55),0 2px 5px rgba(0,0,0,0.3),inset 0 1.5px 0 rgba(255,255,255,0.32),inset 0 -2px 0 rgba(0,0,0,0.14);transition:all .2s ease;}
+.btn:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(60,150,110,0.6),0 4px 8px rgba(0,0,0,0.22),inset 0 1.5px 0 rgba(255,255,255,0.32);}
+.btn:active{transform:translateY(1px);box-shadow:0 3px 10px rgba(60,150,110,0.35),inset 0 2px 5px rgba(0,0,0,0.18);}
+.btn2{padding:10px 22px;background:rgba(255,255,255,0.08);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.16);border-radius:50px;color:#e8f4f0;font-size:12px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.2),inset 0 1px 0 rgba(255,255,255,0.1);transition:all .2s;}
+.btn2:hover{background:rgba(255,255,255,0.14);border-color:rgba(126,184,164,0.35);transform:translateY(-2px);}
+.btn2:active{transform:translateY(1px)}
+.btnx{padding:10px 16px;background:rgba(220,80,80,0.1);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(220,80,80,0.2);border-radius:50px;color:rgba(240,160,160,.85);font-size:12px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.15);transition:all .2s;}
+.btnx:hover{background:rgba(220,80,80,0.2);transform:translateY(-2px);}
+.btnx:active{transform:translateY(1px)}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div class="app">
+
+  <!-- Мова -->
+  <div class="lbar">
+    <button class="lb on" onclick="setLang('ua')">UA</button>
+    <button class="lb" onclick="setLang('en')">EN</button>
+    <button class="lb" onclick="setLang('es')">ES</button>
+  </div>
+  <div class="app-nm" id="app-nm">СПОКІЙ</div>
+  <div class="spill">🔥&nbsp;<span id="wn">0</span>&nbsp;<span id="wsl"></span></div>
+
+  <!-- Цитата (idle + done) -->
+  <div class="qbox" id="el-q"><div class="qt" id="wq"></div><div class="qa" id="wa"></div></div>
+
+  <!-- ── ЕКРАН 1: Налаштування (idle) ── -->
+  <div class="sa" id="el-s">
+    <div class="og"><div class="ol" id="sdl"></div>
+      <!-- Тривалість — по центру -->
+      <div class="chips" id="cd" style="justify-content:center;flex-wrap:wrap">
+        <div class="chip on" data-v="5"  onclick="pick(this,'d')"></div>
+        <div class="chip" data-v="10" onclick="pick(this,'d')"></div>
+        <div class="chip" data-v="15" onclick="pick(this,'d')"></div>
+        <div class="chip" data-v="20" onclick="pick(this,'d')"></div>
+      </div>
+    </div>
+    <div class="og"><div class="ol" id="ssl"></div>
+      <div class="chips-grid" id="cs">
+        <div class="chip on" data-v="aurora"  onclick="pick(this,'s')"></div>
+        <div class="chip" data-v="bells"   onclick="pick(this,'s')"></div>
+        <div class="chip" data-v="birds"   onclick="pick(this,'s')"></div>
+        <div class="chip" data-v="crystal" onclick="pick(this,'s')"></div>
+        <div class="chip" data-v="dawn"    onclick="pick(this,'s')"></div>
+        <div class="chip" data-v="fire"    onclick="pick(this,'s')"></div>
+        <div class="chip" data-v="forest"  onclick="pick(this,'s')"></div>
+        <div class="chip" data-v="memoirs" onclick="pick(this,'s')"></div>
+        <div class="chip" data-v="ocean"   onclick="pick(this,'s')"></div>
+        <div class="chip" data-v="radiance" onclick="pick(this,'s')"></div>
+        <div class="chip" data-v="rain"    onclick="pick(this,'s')"></div>
+        <div class="chip" data-v="space"   onclick="pick(this,'s')"></div>
+        <div class="chip" data-v="spring"  onclick="pick(this,'s')"></div>
+        <div class="chip" data-v="stars"   onclick="pick(this,'s')"></div>
+      </div>
+    </div>
+    <!-- Техніки дихання: новий порядок + назви -->
+    <div class="og"><div class="ol" id="sbl"></div>
+      <div class="chips" id="cb" style="justify-content:center;flex-wrap:wrap">
+        <div class="chip on" data-v="46"   onclick="pick(this,'b')"></div>
+        <div class="chip" data-v="4444" onclick="pick(this,'b')"></div>
+        <div class="chip" data-v="4464" onclick="pick(this,'b')"></div>
+        <div class="chip" data-v="478"  onclick="pick(this,'b')"></div>
+      </div>
+    </div>
+    <!-- Кнопка ПОЧАТИ — під видами дихання -->
+    <div style="display:flex;justify-content:center;margin-top:10px">
+      <button class="btn" id="b1" onclick="handleMain()"></button>
+    </div>
+  </div>
+
+  <!-- ── Статистика (done) ── -->
+  <div class="sta" id="el-r">
+    <div class="stat"><div class="sv" id="dm"></div><div class="sl" id="dml"></div></div>
+    <div class="stat"><div class="sv" id="ds"></div><div class="sl" id="dsl"></div></div>
+    <div class="stat"><div class="sv" id="dc"></div><div class="sl" id="dcl"></div></div>
+    <div class="stat"><div class="sv" id="dp"></div><div class="sl" id="dpl"></div></div>
+  </div>
+  <div class="smsg" id="dsm"></div>
+  <!-- Кнопка НОВА СЕСІЯ (done) -->
+  <div id="done-btns" style="display:none;justify-content:center;flex-shrink:0">
+    <button class="btn" id="b1b" onclick="handleMain()"></button>
+  </div>
+
+  <!-- ── ЕКРАН 2: Сесія (circle + кнопки разом, по центру) ── -->
+  <div id="sess-area" style="display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:18px;position:relative;z-index:1">
+    <div class="cwrap">
+      <svg viewBox="0 0 160 160" style="width:min(160px,72vw);height:auto;display:block">
+        <circle cx="80" cy="80" r="75" fill="none" stroke="rgba(126,184,164,0.1)" stroke-width="2.5"/>
+        <circle id="sr" cx="80" cy="80" r="75" fill="none" stroke="rgba(126,184,164,0.35)" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="471.2" stroke-dashoffset="0" transform="rotate(-90,80,80)"/>
+        <circle cx="80" cy="80" r="62" fill="rgba(0,0,0,0.12)" stroke="rgba(255,255,255,0.04)" stroke-width="11"/>
+        <circle id="br" cx="80" cy="80" r="62" fill="none" stroke="#5ab4d6" stroke-width="11" stroke-linecap="round" stroke-dasharray="389.6" stroke-dashoffset="389.6" transform="rotate(-90,80,80)"/>
+      </svg>
+      <div class="ctext">
+        <div class="ph-nm" id="pnm" style="color:rgba(168,213,194,0.45)">···</div>
+        <div class="ph-ct" id="pct" style="color:rgba(168,213,194,0.35)">·</div>
+        <div class="snd-l" id="snl"></div>
+        <div class="sess-l" id="stl">--:--</div>
+      </div>
+    </div>
+    <!-- Кнопки СТОП + ПАУЗА — одразу під колом -->
+    <div style="display:flex;gap:10px;align-items:center">
+      <button class="btnx" id="b3" onclick="doStop()"></button>
+      <button class="btn2" id="b2" onclick="togglePause()"></button>
+    </div>
+  </div>
+
+</div>
+<script>
+const PC={inhale:'#e05252',hold:'#d4a853',exhale:'#5ab4d6'};
+const TR={
+  ua:{nm:'СПОКІЙ',sl:'днів поспіль',sdl:'Тривалість',ssl:'Звук',sbl:'Техніка дихання',
+    dv:['5 хв','10 хв','15 хв','20 хв'],
+    sv:['🌅 Аврора','🔔 Дзвони','🐦 Птахи','💎 Кристал','🌄 Світанок','🔥 Вогонь','🌿 Ліс','📖 Спогади','🌊 Океан','✨ Сяйво','🌧 Дощ','🌌 Космос','🌸 Весна','⭐ Зірки'],
+    bv:['4-6 Засинання','4-4-4-4 Гармонія','4-4-6-4 Стабілізація','4-7-8 Антистрес'],
+    start:'ПОЧАТИ',pause:'ПАУЗА',resume:'ПРОДОВЖИТИ',stop:'СТОП',again:'НОВА СЕСІЯ',
+    inhale:'ВДИХ',hold:'ЗАТРИМКА',exhale:'ВИДИХ',
+    dml:'ХВ',dsl:'СТРІК',dcl:'ЦИКЛИ',dpl:'ТЕХНІКА',
+    snew:'🔥 Новий стрік!',scont:'🔥 Стрік: ',sdays:' днів',done:'ЗАВЕРШЕНО ✓',now:'♪ '},
+  en:{nm:'SERENITY',sl:'days in a row',sdl:'Duration',ssl:'Sound',sbl:'Breathing',
+    dv:['5 min','10 min','15 min','20 min'],
+    sv:['🌅 Aurora','🔔 Bells','🐦 Birds','💎 Crystal','🌄 Dawn','🔥 Fire','🌿 Forest','📖 Memoirs','🌊 Ocean','✨ Radiance','🌧 Rain','🌌 Space','🌸 Spring','⭐ Stars'],
+    bv:['4-6 Sleep Fast','4-4-4-4 Harmony','4-4-6-4 Stabilize','4-7-8 Anti-stress'],
+    start:'START',pause:'PAUSE',resume:'RESUME',stop:'STOP',again:'NEW SESSION',
+    inhale:'INHALE',hold:'HOLD',exhale:'EXHALE',
+    dml:'MIN',dsl:'STREAK',dcl:'CYCLES',dpl:'PATTERN',
+    snew:'🔥 New streak!',scont:'🔥 Streak: ',sdays:' days',done:'DONE ✓',now:'♪ '},
+  es:{nm:'SERENIDAD',sl:'días seguidos',sdl:'Duración',ssl:'Sonido',sbl:'Técnica',
+    dv:['5 min','10 min','15 min','20 min'],
+    sv:['🌅 Aurora','🔔 Campanas','🐦 Pájaros','💎 Cristal','🌄 Amanecer','🔥 Fuego','🌿 Bosque','📖 Memorias','🌊 Océano','✨ Resplandor','🌧 Lluvia','🌌 Espacio','🌸 Primavera','⭐ Estrellas'],
+    bv:['4-6 Dormir','4-4-4-4 Armonía','4-4-6-4 Estabilizar','4-7-8 Anti-estrés'],
+    start:'INICIAR',pause:'PAUSA',resume:'CONTINUAR',stop:'PARAR',again:'NUEVA SESIÓN',
+    inhale:'INHALAR',hold:'RETENER',exhale:'EXHALAR',
+    dml:'MIN',dsl:'RACHA',dcl:'CICLOS',dpl:'TÉCNICA',
+    snew:'🔥 ¡Nueva racha!',scont:'🔥 Racha: ',sdays:' días',done:'COMPLETADO ✓',now:'♪ '}
+};
+const QUOTES={
+  ua:[{t:'«Теперішній момент — єдина брама до всіх моментів.»',a:'Тіч Нат Хан'},{t:'«Усередині тебе є тиша і притулок.»',a:'Герман Гессе'},{t:'«Мир приходить зсередини. Не шукай його зовні.»',a:'Будда'},{t:'«Медитація — це ставати все більше собою.»',a:'Девід Лінч'},{t:'«Тиша — не відсутність, а присутність усього.»',a:'Джон Гроссман'},{t:'«Будь там, де ти є; інакше пропустиш своє життя.»',a:'Будда'},{t:'«Подих — твій якір у теперішньому моменті.»',a:'Тіч Нат Хан'}],
+  en:[{t:'"The present moment is the only door to all moments."',a:'Thich Nhat Hanh'},{t:'"Within you there is a stillness and a sanctuary."',a:'Hermann Hesse'},{t:'"Peace comes from within. Do not seek it without."',a:'Buddha'},{t:'"The thing about meditation: you become more and more you."',a:'David Lynch'},{t:'"Silence is not the absence of something, but the presence of everything."',a:'John Grossmann'},{t:'"Be where you are; otherwise you will miss your life."',a:'Buddha'},{t:'"Breath is the anchor to the present moment."',a:'Thich Nhat Hanh'}],
+  es:[{t:'«El momento presente es la única puerta a todos los momentos.»',a:'Thich Nhat Hanh'},{t:'«Dentro de ti hay una quietud y un santuario.»',a:'Hermann Hesse'},{t:'«La paz viene de adentro. No la busques afuera.»',a:'Buda'},{t:'«La meditación es convertirte más en ti mismo.»',a:'David Lynch'},{t:'«El silencio no es la ausencia, sino la presencia de todo.»',a:'John Grossmann'},{t:'«Sé donde estás; de lo contrario, te perderás tu vida.»',a:'Buda'},{t:'«La respiración es el ancla al momento presente.»',a:'Thich Nhat Hanh'}]
+};
+const PAT={
+  '46':[{p:'inhale',d:4},{p:'exhale',d:6}],
+  '4444':[{p:'inhale',d:4},{p:'hold',d:4},{p:'exhale',d:4},{p:'hold',d:4}],
+  '4464':[{p:'inhale',d:4},{p:'hold',d:4},{p:'exhale',d:6},{p:'hold',d:4}],
+  '478':[{p:'inhale',d:4},{p:'hold',d:7},{p:'exhale',d:8}]
+};
+let lng='ua',dur=5,snd='aurora',br='46';
+let streak=0,lastDate='',streakType='';
+let appState='idle';
+let totalSec=0,remSec=0,pIdx=0,pEl=0,cycles=0;
+let sInt=null,bInt=null;
+
+const cv=document.getElementById('bg'),ctx=cv.getContext('2d');let pts=[];
+function initBg(){cv.width=innerWidth;cv.height=innerHeight;pts=Array.from({length:28},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.8+.5,sp:Math.random()*.22+.07,op:Math.random()*.18+.04}));}
+window.onresize=initBg;
+(function tick(){ctx.clearRect(0,0,cv.width,cv.height);pts.forEach(p=>{p.y-=p.sp;if(p.y<-4){p.y=cv.height+4;p.x=Math.random()*cv.width;}ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(140,210,170,${p.op})`;ctx.fill();});requestAnimationFrame(tick);})();
+initBg();
+
+const $=id=>document.getElementById(id);
+const T=k=>TR[lng][k]||k;
+function setLang(l){lng=l;document.querySelectorAll('.lb').forEach(b=>b.classList.toggle('on',b.textContent===l.toUpperCase()));applyLang();}
+function applyLang(){
+  const L=TR[lng];
+  $('app-nm').textContent=L.nm;$('wsl').textContent=L.sl;
+  $('sdl').textContent=L.sdl;$('ssl').textContent=L.ssl;$('sbl').textContent=L.sbl;
+  $('dml').textContent=L.dml;$('dsl').textContent=L.dsl;$('dcl').textContent=L.dcl;$('dpl').textContent=L.dpl;
+  document.querySelectorAll('#cd .chip').forEach((c,i)=>c.textContent=L.dv[i]);
+  document.querySelectorAll('#cs .chip').forEach((c,i)=>c.textContent=L.sv[i]);
+  document.querySelectorAll('#cb .chip').forEach((c,i)=>c.textContent=L.bv[i]);
+  if(appState==='running'||appState==='paused'){const ph=PAT[br][pIdx];$('pnm').textContent=({inhale:L.inhale,hold:L.hold,exhale:L.exhale})[ph.p]||L.hold;}
+  if(streakType)$('dsm').textContent=buildStreakMsg();
+  updateSndLabel();setQuote();refreshBtns();
+}
+function setQuote(){const arr=QUOTES[lng];const q=arr[Math.floor(Date.now()/86400000)%arr.length];$('wq').textContent=q.t;$('wa').textContent='— '+q.a;}
+const SNDS=['aurora','bells','birds','crystal','dawn','fire','forest','memoirs','ocean','radiance','rain','space','spring','stars'];
+function updateSndLabel(){const i=SNDS.indexOf(snd);$('snl').textContent=(appState==='running'||appState==='paused')?(TR[lng].now+TR[lng].sv[i]):'';}
+function loadStreak(){streak=parseInt(localStorage.getItem('ms')||'0');lastDate=localStorage.getItem('msd')||'';const today=new Date().toDateString(),yest=new Date(Date.now()-864e5).toDateString();if(lastDate&&lastDate!==today&&lastDate!==yest){streak=0;localStorage.setItem('ms','0');}$('wn').textContent=streak;}
+function buildStreakMsg(){const L=TR[lng];return streakType==='new'?L.snew:streakType==='cont'?L.scont+streak+L.sdays:`🔥 ${streak}${L.sdays}`;}
+function saveStreak(){const today=new Date().toDateString(),yest=new Date(Date.now()-864e5).toDateString();if(lastDate===today)streakType='repeat';else if(lastDate===yest){streak++;streakType='cont';}else{streak=1;streakType='new';}lastDate=today;localStorage.setItem('ms',streak);localStorage.setItem('msd',today);$('wn').textContent=streak;$('ds').textContent=streak;$('dsm').textContent=buildStreakMsg();}
+function pick(el,g){document.querySelectorAll(`#c${g} .chip`).forEach(c=>c.classList.remove('on'));el.classList.add('on');const v=el.dataset.v;if(g==='d')dur=parseInt(v);if(g==='s')snd=v;if(g==='b')br=v;}
+
+function setState(s){
+  appState=s;
+  $('el-q').style.display=(s==='idle'||s==='done')?'block':'none';
+  $('el-s').style.display=s==='idle'?'block':'none';
+  $('el-r').style.display=s==='done'?'grid':'none';
+  $('dsm').style.display=s==='done'?'block':'none';
+  $('done-btns').style.display=s==='done'?'flex':'none';
+  $('sess-area').style.display=(s==='running'||s==='paused')?'flex':'none';
+  refreshBtns();updateSndLabel();
+}
+function refreshBtns(){
+  const L=TR[lng];
+  $('b1').textContent=L.start;
+  $('b1b').textContent=L.again;
+  $('b2').textContent=appState==='paused'?L.resume:L.pause;
+  $('b3').textContent=L.stop;
+}
+function handleMain(){if(appState==='done'){setState('idle');resetCircle();}else startSess();}
+function startSess(){setState('running');totalSec=dur*60;remSec=totalSec;pIdx=0;pEl=0;cycles=0;resetCircle();startAudio();runPhase();sInt=setInterval(()=>{if(appState==='paused')return;remSec--;updateSessRing();updateSessTime();if(remSec<=0){clearInterval(sInt);clearInterval(bInt);stopAudio();finishSess();}},1000);updateSessRing();updateSessTime();}
+function updateSessRing(){$('sr').style.strokeDashoffset=471.2*(1-remSec/totalSec);}
+function updateSessTime(){$('stl').textContent=String(Math.floor(remSec/60)).padStart(2,'0')+':'+String(remSec%60).padStart(2,'0');}
+function togglePause(){appState=appState==='paused'?'running':'paused';appState==='paused'?pauseAudio():resumeAudio();refreshBtns();}
+function doStop(){clearInterval(sInt);clearInterval(bInt);sInt=null;bInt=null;stopAudio();resetCircle();setState('idle');}
+function finishSess(){saveStreak();$('dm').textContent=dur;$('dc').textContent=cycles;$('dp').textContent={'46':'4-6','4444':'4-4-4-4','4464':'4-4-6-4','478':'4-7-8'}[br];$('br').style.stroke='#7eb8a4';$('br').style.strokeDashoffset='0';$('sr').style.strokeDashoffset='471.2';$('pnm').textContent=T('done');$('pnm').style.color='#7eb8a4';$('pct').textContent='';$('stl').textContent='00:00';setState('done');}
+function runPhase(){clearInterval(bInt);const ph=PAT[br][pIdx];pEl=0;const L=TR[lng];const color=PC[ph.p]||PC.hold;$('pnm').textContent=({inhale:L.inhale,hold:L.hold,exhale:L.exhale})[ph.p]||L.hold;$('pnm').style.color=color;$('pct').style.color=color;$('br').style.stroke=color;const dms=ph.d*1000;const C=389.6;bInt=setInterval(()=>{if(appState==='paused')return;pEl+=50;const prog=Math.min(pEl/dms,1);$('br').style.strokeDashoffset=C*(1-prog);$('pct').textContent=String(Math.max(0,Math.ceil(ph.d-pEl/1000)));if(pEl>=dms){clearInterval(bInt);pIdx++;if(pIdx>=PAT[br].length){pIdx=0;cycles++;}runPhase();}},50);}
+function resetCircle(){$('sr').style.strokeDashoffset='0';$('br').style.strokeDashoffset='389.6';$('br').style.stroke='rgba(126,184,164,0.3)';$('pnm').textContent='···';$('pnm').style.color='rgba(168,213,194,0.4)';$('pct').textContent='·';$('pct').style.color='rgba(168,213,194,0.35)';$('stl').textContent='--:--';$('snl').textContent='';}
+
+// ── Audio ────────────────────────────────────────────────────
+const ABASE='https://archive.org/download/aurora_202606/';
+const SR=22050;let audio=null,mp3Try=null;const blobCache={};
+function getBlobURL(nm){if(!blobCache[nm])blobCache[nm]=genSound(nm);return blobCache[nm];}
+function startAudio(){stopAudio();let settled=false;function useMp3(el){if(settled)return;settled=true;audio=el;mp3Try=null;}function useWav(){if(settled)return;settled=true;if(mp3Try){mp3Try.pause();mp3Try.src='';mp3Try=null;}audio=new Audio(getBlobURL(snd));audio.loop=true;audio.volume=0.7;audio.play().catch(()=>{});}mp3Try=new Audio(ABASE+snd+'.mp3');mp3Try.loop=true;mp3Try.volume=0.7;mp3Try.addEventListener('playing',()=>useMp3(mp3Try),{once:true});mp3Try.addEventListener('error',useWav,{once:true});const p=mp3Try.play();if(p)p.catch(useWav);setTimeout(useWav,1800);}
+function pauseAudio(){if(audio)audio.pause();}
+function resumeAudio(){if(audio)audio.play().catch(()=>{});}
+function stopAudio(){if(mp3Try){mp3Try.pause();mp3Try.src='';mp3Try=null;}if(audio){audio.pause();audio.src='';audio=null;}}
+
+// ── WAV DSP ──────────────────────────────────────────────────
+function toWAV(buf){const n=buf.length,ab=new ArrayBuffer(44+n*2),v=new DataView(ab);const ws=(o,s)=>[...s].forEach((c,i)=>v.setUint8(o+i,c.charCodeAt(0)));ws(0,'RIFF');v.setUint32(4,36+n*2,true);ws(8,'WAVE');ws(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,SR,true);v.setUint32(28,SR*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);ws(36,'data');v.setUint32(40,n*2,true);for(let i=0;i<n;i++)v.setInt16(44+i*2,Math.max(-32767,Math.min(32767,buf[i]*32767)),true);return URL.createObjectURL(new Blob([ab],{type:'audio/wav'}));}
+function lpf(b,fc){let y=0;const a=1-Math.exp(-2*Math.PI*fc/SR);for(let i=0;i<b.length;i++){y+=a*(b[i]-y);b[i]=y;}}
+function hpf(b,fc){let y=0,xp=0;const a=Math.exp(-2*Math.PI*fc/SR);for(let i=0;i<b.length;i++){y=a*(y+b[i]-xp);xp=b[i];b[i]=y;}}
+function addNoise(b,a){for(let i=0;i<b.length;i++)b[i]+=(Math.random()*2-1)*a;}
+function norm(b,pk=0.68){let m=0;for(let i=0;i<b.length;i++)m=Math.max(m,Math.abs(b[i]));if(m>0)for(let i=0;i<b.length;i++)b[i]=b[i]/m*pk;}
+function fade(b,t=0.08){const n=Math.floor(SR*t);for(let i=0;i<n&&i<b.length;i++){const f=i/n;b[i]*=f;b[b.length-1-i]*=f;}}
+function buf(sec){return new Float32Array(Math.floor(SR*sec));}
+function genSound(nm){let b;switch(nm){case 'rain':{b=buf(3);addNoise(b,1);lpf(b,1800);norm(b,0.6);break;}case 'ocean':{b=buf(5);addNoise(b,1);lpf(b,320);for(let i=0;i<b.length;i++)b[i]*=0.55+0.45*Math.sin(2*Math.PI*0.09*i/SR);norm(b,0.65);break;}case 'forest':{b=buf(4);addNoise(b,1);lpf(b,600);hpf(b,140);norm(b,0.5);addChirps(b,6,1300,1100,0.25);norm(b,0.65);break;}case 'birds':{b=buf(4);addNoise(b,.4);lpf(b,500);hpf(b,120);norm(b,.3);addChirps(b,14,1400,1400,0.35);norm(b,0.68);break;}case 'fire':{b=buf(4);addNoise(b,1);lpf(b,220);for(let i=0;i<b.length;i++)b[i]*=0.65+0.35*Math.sin(2*Math.PI*1.6*i/SR+3*Math.sin(i/350));const cr=buf(4);addNoise(cr,.15);hpf(cr,3000);for(let i=0;i<b.length;i++)b[i]+=cr[i];norm(b,0.62);break;}case 'spring':{b=buf(3);addNoise(b,.5);lpf(b,650);hpf(b,180);norm(b,.35);addChirps(b,14,1900,1600,0.3);norm(b,0.68);break;}case 'bells':{b=buf(6);addBells(b,[523,659,784,1047]);norm(b,.7);break;}case 'crystal':{b=buf(6);addBells(b,[1047,1319,1568,2093]);norm(b,.65);break;}case 'stars':{b=buf(6);addBells(b,[2093,2637,3136,3951]);norm(b,.6);break;}case 'aurora':{b=buf(5);addPads(b,[196,247,294,370,440],0.06);norm(b,.7);break;}case 'space':{b=buf(6);addPads(b,[55,82,110,147],0.07);addNoise(b,.07);lpf(b,80);norm(b,.65);break;}case 'dawn':{b=buf(5);addPads(b,[220,277,330,415,494],0.065);norm(b,.7);break;}case 'radiance':{b=buf(5);addPads(b,[330,440,554,659,831],0.055);norm(b,.7);break;}case 'memoirs':{b=buf(8);addMelody(b,[262,330,392,349,294,262,330,392]);norm(b,.7);break;}default:{b=buf(3);addNoise(b,1);lpf(b,1200);norm(b,.5);}}fade(b,0.1);return toWAV(b);}
+function addChirps(b,count,fBase,fRange,amp){for(let c=0;c<count;c++){const s=Math.floor(Math.random()*(b.length*.88));const f=fBase+Math.random()*fRange;const len=Math.floor(SR*(0.1+Math.random()*0.12));for(let i=0;i<len&&s+i<b.length;i++){const e=Math.sin(Math.PI*i/len);b[s+i]+=amp*e*Math.sin(2*Math.PI*f*i/SR);}}}
+function addBells(b,freqs){freqs.forEach((f,k)=>{const s=Math.floor(b.length*k/freqs.length);for(let i=0;i<b.length-s;i++){const e=Math.exp(-i/(SR*2.5));b[s+i]+=0.3*e*Math.sin(2*Math.PI*f*i/SR);b[s+i]+=0.1*e*Math.sin(2*Math.PI*f*2.01*i/SR);}});}
+function addPads(b,freqs,amp){freqs.forEach((f,k)=>{const ph=k*1.9416;const lf=0.04+k*0.014;for(let i=0;i<b.length;i++){const lfo=0.65+0.35*Math.sin(2*Math.PI*lf*i/SR+ph);b[i]+=amp*lfo*Math.sin(2*Math.PI*f*i/SR+ph);}});}
+function addMelody(b,notes){const nd=Math.floor(b.length/notes.length);notes.forEach((f,k)=>{const s=nd*k;for(let i=0;i<nd*1.3&&s+i<b.length;i++){const t=i/SR;const e=Math.min(1,t*10)*Math.exp(-t*1.1);b[s+i]+=0.28*e*Math.sin(2*Math.PI*f*i/SR);}});}
+
+applyLang();loadStreak();setQuote();setState('idle');resetCircle();
+</script>
+</body>
+</html>
