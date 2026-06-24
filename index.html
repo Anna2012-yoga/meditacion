@@ -1,8 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Спокій — Дихальна медитація</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -62,7 +64,7 @@
 
   .chip-row{ display:flex; gap:10px; flex-wrap:wrap; }
   .chip{
-    flex:1; min-width:60px;
+    flex:1; min-width:60px; min-height:44px;
     background:var(--glass-2);
     border:1px solid var(--glass-b);
     color:var(--text);
@@ -188,10 +190,40 @@
     .breath-wrap{ width:220px; height:220px; }
     .breath-circle{ width:160px; height:160px; }
   }
+
+  /* Focus states for keyboard navigation */
+  button:focus-visible,
+  .chip:focus-visible,
+  .sound-btn:focus-visible,
+  .tech-card:focus-visible,
+  .btn-round:focus-visible,
+  .btn-primary:focus-visible{
+    outline:2px solid var(--gold-l);
+    outline-offset:2px;
+  }
+
+  /* Hover feedback for mouse/trackpad users (not on touch) */
+  @media (hover:hover) and (pointer:fine){
+    .chip:hover, .sound-btn:hover, .tech-card:hover{
+      border-color:rgba(224,184,112,0.5);
+      filter:brightness(1.08);
+    }
+    .btn-round:hover{ filter:brightness(1.12); }
+    .btn-primary:hover:not(:disabled){ filter:brightness(1.05); }
+  }
+
+  /* Respect reduced motion preference */
+  @media (prefers-reduced-motion:reduce){
+    *{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; }
+    .screen{ animation:none; }
+    .chip, .sound-btn, .tech-card, .btn-round, .btn-primary{ transition:none; }
+    .breath-circle, .ring-progress{ transition:none !important; }
+    #particles{ display:none; }
+  }
 </style>
 </head>
 <body>
-<canvas id="particles"></canvas>
+<canvas id="particles" aria-hidden="true"></canvas>
 <div class="app-root">
 
   <!-- SETUP SCREEN -->
@@ -240,11 +272,11 @@
     </div>
     <div class="session-controls">
       <div class="control-wrap">
-        <button class="btn-round" id="pause-btn">⏸</button>
+        <button class="btn-round" id="pause-btn" aria-label="Пауза">⏸</button>
         <span class="control-label">Пауза</span>
       </div>
       <div class="control-wrap">
-        <button class="btn-round btn-stop" id="stop-btn">⏹</button>
+        <button class="btn-round btn-stop" id="stop-btn" aria-label="Зупинити сесію">⏹</button>
         <span class="control-label">Стоп</span>
       </div>
     </div>
@@ -266,7 +298,7 @@
   </div>
 
 </div>
-<audio id="bg-audio" loop></audio>
+<audio id="bg-audio" loop aria-hidden="true"></audio>
 
 <script>
 (function(){
@@ -327,6 +359,13 @@
   };
   var streakCount = 0;
   var lastStreakDay = null;
+  // Відновлюємо стрік зі сховища (інакше лічильник скидався при кожному перезавантаженні)
+  try {
+    var savedStreak = localStorage.getItem('spokiy_streak');
+    var savedDay = localStorage.getItem('spokiy_lastDay');
+    if(savedStreak !== null) streakCount = parseInt(savedStreak, 10) || 0;
+    if(savedDay !== null) lastStreakDay = savedDay;
+  } catch(e){ /* localStorage недоступний — працюємо в межах сесії */ }
 
   // ---------- DOM ----------
   var durationRow = document.getElementById('duration-row');
@@ -339,9 +378,11 @@
   [5,10,15,20].forEach(function(v){
     var b = document.createElement('button');
     b.className = 'chip'; b.dataset.val = v; b.textContent = v + ' хв';
+    b.setAttribute('aria-pressed', 'false');
     b.onclick = function(){
-      Array.prototype.forEach.call(durationRow.children, function(c){ c.classList.remove('selected'); });
+      Array.prototype.forEach.call(durationRow.children, function(c){ c.classList.remove('selected'); c.setAttribute('aria-pressed','false'); });
       b.classList.add('selected');
+      b.setAttribute('aria-pressed', 'true');
       state.duration = v;
       checkReady();
     };
@@ -352,10 +393,12 @@
   SOUNDS.forEach(function(s){
     var b = document.createElement('button');
     b.className = 'sound-btn'; b.dataset.id = s.id;
-    b.innerHTML = '<span class="ic">'+s.ic+'</span><span>'+s.name+'</span>';
+    b.innerHTML = '<span class="ic" aria-hidden="true">'+s.ic+'</span><span>'+s.name+'</span>';
+    b.setAttribute('aria-pressed', 'false');
     b.onclick = function(){
-      Array.prototype.forEach.call(soundGrid.children, function(c){ c.classList.remove('selected'); });
+      Array.prototype.forEach.call(soundGrid.children, function(c){ c.classList.remove('selected'); c.setAttribute('aria-pressed','false'); });
       b.classList.add('selected');
+      b.setAttribute('aria-pressed', 'true');
       state.soundId = s.id;
       checkReady();
     };
@@ -366,12 +409,20 @@
   TECHNIQUES.forEach(function(t){
     var card = document.createElement('div');
     card.className = 'tech-card'; card.dataset.id = t.id;
+    card.setAttribute('role', 'button');
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('aria-pressed', 'false');
     card.innerHTML = '<div class="t-name">'+t.name+'</div><div class="t-desc">'+t.desc+'</div>';
-    card.onclick = function(){
-      Array.prototype.forEach.call(techList.children, function(c){ c.classList.remove('selected'); });
+    var select = function(){
+      Array.prototype.forEach.call(techList.children, function(c){ c.classList.remove('selected'); c.setAttribute('aria-pressed','false'); });
       card.classList.add('selected');
+      card.setAttribute('aria-pressed', 'true');
       state.techniqueId = t.id;
       checkReady();
+    };
+    card.onclick = select;
+    card.onkeydown = function(e){
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); select(); }
     };
     techList.appendChild(card);
   });
@@ -507,19 +558,63 @@
         streakCount = 1;
       }
       lastStreakDay = today;
+      try {
+        localStorage.setItem('spokiy_streak', String(streakCount));
+        localStorage.setItem('spokiy_lastDay', today);
+      } catch(e){ /* localStorage недоступний */ }
     }
-    document.getElementById('streak-text').textContent = 'Стрік: ' + streakCount + (streakCount===1?' день':' днів');
+    updateStreakDisplay();
+  }
+
+  function updateStreakDisplay(){
+    var label;
+    var mod10 = streakCount % 10, mod100 = streakCount % 100;
+    if(mod10 === 1 && mod100 !== 11) label = ' день';
+    else if(mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) label = ' дні';
+    else label = ' днів';
+    document.getElementById('streak-text').textContent = 'Стрік: ' + streakCount + label;
   }
 
   // ---------- EVENTS ----------
+  updateStreakDisplay(); // показуємо відновлений стрік на старті
   document.getElementById('start-btn').onclick = startSession;
+
+  function freezeVisuals(){
+    // Заморожуємо CSS-transition на поточному стані, щоб коло й кільце не "тікали" під час паузи
+    var ringNow = getComputedStyle(ringEl).strokeDashoffset;
+    ringEl.style.transition = 'none';
+    ringEl.style.strokeDashoffset = ringNow;
+    var circNow = getComputedStyle(circleEl).transform;
+    circleEl.style.transition = 'none';
+    circleEl.style.transform = (circNow && circNow !== 'none') ? circNow : 'scale('+state.lastScale+')';
+  }
+
+  function resumeVisuals(){
+    var tech = getTechnique();
+    var ph = tech.phases[state.phaseIdx];
+    var rem = Math.max(1, state.phaseRemaining);
+    void ringEl.offsetWidth; // reflow
+    ringEl.style.transition = 'stroke-dashoffset ' + rem + 's linear';
+    ringEl.style.strokeDashoffset = 0;
+    if(ph.color === 'red'){
+      circleEl.style.transition = 'transform '+rem+'s ease-in-out, box-shadow 0.4s ease';
+      circleEl.style.transform = 'scale(1.22)';
+    } else if(ph.color === 'blue'){
+      circleEl.style.transition = 'transform '+rem+'s ease-in-out, box-shadow 0.4s ease';
+      circleEl.style.transform = 'scale(1)';
+    } else {
+      circleEl.style.transition = 'box-shadow 0.4s ease';
+      circleEl.style.transform = 'scale('+state.lastScale+')';
+    }
+  }
 
   pauseBtn.onclick = function(){
     state.paused = !state.paused;
     pauseBtn.textContent = state.paused ? '▶' : '⏸';
+    pauseBtn.setAttribute('aria-label', state.paused ? 'Продовжити' : 'Пауза');
     pauseBtn.nextElementSibling.textContent = state.paused ? 'Продовжити' : 'Пауза';
-    if(state.paused){ bgAudio.pause(); }
-    else { bgAudio.play().catch(function(){}); }
+    if(state.paused){ bgAudio.pause(); freezeVisuals(); }
+    else { bgAudio.play().catch(function(){}); resumeVisuals(); }
   };
 
   document.getElementById('stop-btn').onclick = function(){ endSession(false); };
@@ -547,6 +642,8 @@
     });
   }
 
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   function animateParticles(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
     particles.forEach(function(p){
@@ -560,7 +657,8 @@
     });
     requestAnimationFrame(animateParticles);
   }
-  animateParticles();
+  // Поважаємо prefers-reduced-motion: не запускаємо анімований фон
+  if(!reduceMotion){ animateParticles(); }
 
 })();
 </script>
