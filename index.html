@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="uk">
 <head>
@@ -233,7 +232,7 @@
 
     <div class="glass-card streak-card">
       <span class="streak-icon">🔥</span>
-      <span id="streak-text">Стрік: 0 днів</span>
+      <span id="streak-text">Тривалість: 0 днів</span>
     </div>
 
     <div class="glass-card section">
@@ -572,7 +571,7 @@
     if(mod10 === 1 && mod100 !== 11) label = ' день';
     else if(mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) label = ' дні';
     else label = ' днів';
-    document.getElementById('streak-text').textContent = 'Стрік: ' + streakCount + label;
+    document.getElementById('streak-text').textContent = 'Тривалість: ' + streakCount + label;
   }
 
   // ---------- EVENTS ----------
