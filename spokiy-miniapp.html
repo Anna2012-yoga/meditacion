@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Спокій — Дихальна медитація</title>
+<!-- Telegram Mini App SDK -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-1:#0a2417; --bg-2:#0e3322; --bg-3:#123d29;
+    --glass:rgba(255,255,255,0.07); --glass-b:rgba(255,255,255,0.16);
+    --glass-2:rgba(255,255,255,0.12);
+    --gold:#e0b870; --gold-l:#f3dca8;
+    --text:#eef5ee; --text-dim:#a9c2b3;
+    --red:#e8736a; --yellow:#e8c468; --blue:#6aabe8;
+    --shadow-out: 0 8px 24px rgba(0,0,0,0.35);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html, body{
+    height:auto;
+    min-height:100%;
+    overflow-y:auto;
+    overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+  }
+  body{
+    font-family:'Nunito',sans-serif;
+    background:radial-gradient(ellipse at top, var(--bg-3), var(--bg-1) 70%);
+    color:var(--text);
+    position:relative;
+  }
+  #particles{ position:fixed; inset:0; z-index:0; pointer-events:none; }
+  .app-root{
+    position:relative; z-index:1;
+    max-width:480px; margin:0 auto;
+    min-height:100vh;
+    padding:28px 18px 40px;
+    display:flex; flex-direction:column;
+  }
+  .screen{ display:none; flex-direction:column; gap:16px; animation:fadeIn .4s ease; }
+  .screen.active{ display:flex; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+
+  .logo{ text-align:center; font-size:38px; font-weight:900; letter-spacing:1px;
+    color:var(--gold-l); text-shadow:0 2px 12px rgba(224,184,112,0.35); margin-top:6px;}
+  .subtitle{ text-align:center; color:var(--text-dim); font-size:14px; margin-bottom:6px;}
+
+  .glass-card{
+    background:var(--glass);
+    border:1px solid var(--glass-b);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    border-radius:20px;
+    padding:18px;
+    box-shadow:var(--shadow-out), inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  .streak-card{ display:flex; align-items:center; gap:10px; padding:12px 16px; justify-content:center; }
+  .streak-icon{ font-size:20px; }
+  #streak-text{ font-weight:700; color:var(--gold-l); font-size:14px; }
+
+  .section h2{ font-size:15px; font-weight:700; margin-bottom:12px; color:var(--text); opacity:0.9; }
+
+  .chip-row{ display:flex; gap:10px; flex-wrap:wrap; }
+  .chip{
+    flex:1; min-width:60px; min-height:44px;
+    background:var(--glass-2);
+    border:1px solid var(--glass-b);
+    color:var(--text);
+    border-radius:14px;
+    padding:12px 8px;
+    font-family:inherit; font-weight:700; font-size:14px;
+    cursor:pointer;
+    transition:all .25s ease;
+    box-shadow:0 4px 0 rgba(0,0,0,0.18);
+  }
+  .chip:active{ transform:translateY(2px); box-shadow:0 2px 0 rgba(0,0,0,0.18); }
+  .chip.selected{
+    background:linear-gradient(160deg, var(--gold-l), var(--gold));
+    color:#173322; border-color:transparent;
+    box-shadow:0 4px 0 rgba(0,0,0,0.25), 0 0 14px rgba(224,184,112,0.4);
+  }
+
+  .sound-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .sound-btn{
+    background:var(--glass-2);
+    border:1px solid var(--glass-b);
+    color:var(--text);
+    border-radius:14px;
+    padding:12px 4px;
+    font-family:inherit; font-weight:600; font-size:12px;
+    cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    transition:all .25s ease;
+    box-shadow:0 4px 0 rgba(0,0,0,0.18);
+  }
+  .sound-btn span.ic{ font-size:18px; }
+  .sound-btn:active{ transform:translateY(2px); box-shadow:0 2px 0 rgba(0,0,0,0.18); }
+  .sound-btn.selected{
+    background:linear-gradient(160deg, #4a8a68, #2c6647);
+    border-color:rgba(255,255,255,0.3);
+    box-shadow:0 4px 0 rgba(0,0,0,0.25), 0 0 14px rgba(74,138,104,0.5);
+  }
+
+  .technique-list{ display:flex; flex-direction:column; gap:10px; }
+  .tech-card{
+    background:var(--glass-2);
+    border:1px solid var(--glass-b);
+    border-radius:16px;
+    padding:14px;
+    cursor:pointer;
+    transition:all .25s ease;
+    box-shadow:0 4px 0 rgba(0,0,0,0.18);
+  }
+  .tech-card:active{ transform:translateY(2px); box-shadow:0 2px 0 rgba(0,0,0,0.18); }
+  .tech-card.selected{
+    background:linear-gradient(135deg, rgba(224,184,112,0.25), rgba(224,184,112,0.08));
+    border-color:var(--gold);
+    box-shadow:0 4px 0 rgba(0,0,0,0.2), 0 0 14px rgba(224,184,112,0.25);
+  }
+  .tech-card .t-name{ font-weight:800; font-size:14px; color:var(--gold-l); }
+  .tech-card .t-desc{ font-size:12px; color:var(--text-dim); margin-top:3px; }
+
+  .btn-primary{
+    margin-top:6px;
+    background:linear-gradient(160deg, var(--gold-l), var(--gold));
+    color:#173322;
+    border:none; border-radius:16px;
+    padding:16px;
+    font-family:inherit; font-weight:800; font-size:16px;
+    cursor:pointer;
+    box-shadow:0 6px 0 rgba(0,0,0,0.25), 0 0 20px rgba(224,184,112,0.3);
+    transition:all .2s ease;
+  }
+  .btn-primary:active{ transform:translateY(3px); box-shadow:0 3px 0 rgba(0,0,0,0.25); }
+  .btn-primary:disabled{ opacity:0.4; cursor:not-allowed; box-shadow:none; }
+
+  /* Session screen */
+  #screen-session{ flex:1; justify-content:space-between; min-height:80vh; }
+  .session-top{ display:flex; justify-content:space-between; align-items:center; padding:0 4px; }
+  #technique-label{ font-weight:700; font-size:14px; color:var(--gold-l); }
+  #time-remaining{ font-weight:800; font-size:16px; color:var(--text); font-variant-numeric:tabular-nums; }
+
+  .breath-wrap{ position:relative; width:260px; height:260px; margin:30px auto; display:flex; align-items:center; justify-content:center; }
+  .breath-ring{ position:absolute; inset:0; width:100%; height:100%; transform:rotate(-90deg); }
+  .ring-bg{ fill:none; stroke:rgba(255,255,255,0.1); stroke-width:6; }
+  .ring-progress{ fill:none; stroke:var(--red); stroke-width:6; stroke-linecap:round; stroke-dasharray:565.48; stroke-dashoffset:565.48; }
+
+  .breath-circle{
+    width:190px; height:190px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, rgba(255,255,255,0.15), rgba(255,255,255,0.02));
+    border:1px solid var(--glass-b);
+    backdrop-filter:blur(6px);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    box-shadow:0 0 40px rgba(232,115,106,0.25), inset 0 1px 0 rgba(255,255,255,0.15);
+    transform:scale(1);
+    transition:transform 4s ease-in-out, box-shadow 0.4s ease;
+  }
+  .phase-label{ font-size:18px; font-weight:800; letter-spacing:0.5px; }
+  .phase-count{ font-size:48px; font-weight:900; font-variant-numeric:tabular-nums; margin-top:2px; }
+
+  .session-controls{ display:flex; justify-content:center; gap:24px; margin-top:10px; padding-bottom:10px;}
+  .control-wrap{ display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .control-label{ font-size:12px; font-weight:700; color:var(--text-dim); letter-spacing:0.3px; }
+  .btn-round{
+    width:62px; height:62px; border-radius:50%;
+    background:var(--glass-2); border:1px solid var(--glass-b);
+    color:var(--text); font-size:22px;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 6px 0 rgba(0,0,0,0.25);
+    transition:all .2s ease;
+  }
+  .btn-round:active{ transform:translateY(3px); box-shadow:0 3px 0 rgba(0,0,0,0.25); }
+  .btn-stop{ background:linear-gradient(160deg, #e8736a, #c2473d); border-color:transparent; }
+
+  /* Summary */
+  #screen-summary{ flex:1; justify-content:center; }
+  .summary-card{ text-align:center; }
+  .summary-card h2{ font-size:20px; margin-bottom:18px; }
+  .stat-row{ display:flex; justify-content:center; gap:36px; margin-bottom:16px; }
+  .stat span{ display:block; font-size:30px; font-weight:900; color:var(--gold-l); }
+  .stat label{ font-size:12px; color:var(--text-dim); }
+  .sum-technique{ font-size:13px; color:var(--text-dim); margin-bottom:18px; }
+  blockquote{ font-size:15px; font-style:italic; line-height:1.5; color:var(--text); margin-bottom:6px; }
+  cite{ display:block; font-size:12px; color:var(--gold-l); margin-bottom:20px; }
+
+  @media (max-width:360px){
+    .sound-grid{ grid-template-columns:repeat(2,1fr); }
+    .breath-wrap{ width:220px; height:220px; }
+    .breath-circle{ width:160px; height:160px; }
+  }
+
+  /* Focus states for keyboard navigation */
+  button:focus-visible,
+  .chip:focus-visible,
+  .sound-btn:focus-visible,
+  .tech-card:focus-visible,
+  .btn-round:focus-visible,
+  .btn-primary:focus-visible{
+    outline:2px solid var(--gold-l);
+    outline-offset:2px;
+  }
+
+  /* Hover feedback for mouse/trackpad users (not on touch) */
+  @media (hover:hover) and (pointer:fine){
+    .chip:hover, .sound-btn:hover, .tech-card:hover{
+      border-color:rgba(224,184,112,0.5);
+      filter:brightness(1.08);
+    }
+    .btn-round:hover{ filter:brightness(1.12); }
+    .btn-primary:hover:not(:disabled){ filter:brightness(1.05); }
+  }
+
+  /* Respect reduced motion preference */
+  @media (prefers-reduced-motion:reduce){
+    *{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; }
+    .screen{ animation:none; }
+    .chip, .sound-btn, .tech-card, .btn-round, .btn-primary{ transition:none; }
+    .breath-circle, .ring-progress{ transition:none !important; }
+    #particles{ display:none; }
+  }
+
+  /* ---------- ACCESS GATE (захист доступу) ---------- */
+  /* Контент застосунку прихований, поки доступ не підтверджено */
+  body:not(.access-granted) .app-root,
+  body:not(.access-granted) #particles{ display:none !important; }
+
+  .gate{
+    position:fixed; inset:0; z-index:500;
+    display:flex; align-items:center; justify-content:center;
+    padding:24px;
+    background:radial-gradient(ellipse at top, var(--bg-3), var(--bg-1) 70%);
+    animation:fadeIn .4s ease;
+  }
+  .gate.hidden{ display:none; }
+  .gate-card{ max-width:360px; width:100%; text-align:center; padding:34px 26px; }
+  .gate-icon{ font-size:42px; margin-bottom:16px; line-height:1; }
+  .gate-title{ font-size:20px; font-weight:800; color:var(--gold-l); margin-bottom:12px; }
+  .gate-msg{ font-size:14px; color:var(--text-dim); line-height:1.6; margin-bottom:22px; }
+  .gate-close{ width:auto; padding:14px 30px; margin:0 auto; }
+</style>
+</head>
+<body>
+
+<!-- ACCESS GATE — заглушка захисту доступу -->
+<div id="gate" class="gate">
+  <div class="gate-card glass-card">
+    <div class="gate-icon" id="gate-icon">🔒</div>
+    <h2 class="gate-title" id="gate-title">Перевірка доступу…</h2>
+    <p class="gate-msg" id="gate-msg">Зачекайте, будь ласка.</p>
+    <button class="btn-primary gate-close" id="gate-close" style="display:none;">Закрити</button>
+  </div>
+</div>
+
+<canvas id="particles" aria-hidden="true"></canvas>
+<div class="app-root">
+
+  <!-- SETUP SCREEN -->
+  <div class="screen active" id="screen-setup">
+    <h1 class="logo">Спокій</h1>
+    <p class="subtitle">Дихальна медитація для тіла і розуму</p>
+
+    <div class="glass-card streak-card">
+      <span class="streak-icon">🔥</span>
+      <span id="streak-text">Тривалість: 0 днів</span>
+    </div>
+
+    <div class="glass-card section">
+      <h2>Тривалість сесії</h2>
+      <div class="chip-row" id="duration-row"></div>
+    </div>
+
+    <div class="glass-card section">
+      <h2>Фоновий звук</h2>
+      <div class="sound-grid" id="sound-grid"></div>
+    </div>
+
+    <div class="glass-card section">
+      <h2>Техніка дихання</h2>
+      <div class="technique-list" id="technique-list"></div>
+    </div>
+
+    <button class="btn-primary" id="start-btn" disabled>Почати сесію</button>
+  </div>
+
+  <!-- SESSION SCREEN -->
+  <div class="screen" id="screen-session">
+    <div class="session-top">
+      <div id="technique-label">—</div>
+      <div id="time-remaining">00:00</div>
+    </div>
+    <div class="breath-wrap">
+      <svg class="breath-ring" viewBox="0 0 200 200">
+        <circle cx="100" cy="100" r="90" class="ring-bg"/>
+        <circle cx="100" cy="100" r="90" class="ring-progress" id="ring-progress"/>
+      </svg>
+      <div class="breath-circle" id="breath-circle">
+        <span class="phase-label" id="phase-label">Вдих</span>
+        <span class="phase-count" id="phase-count">4</span>
+      </div>
+    </div>
+    <div class="session-controls">
+      <div class="control-wrap">
+        <button class="btn-round" id="pause-btn" aria-label="Пауза">⏸</button>
+        <span class="control-label">Пауза</span>
+      </div>
+      <div class="control-wrap">
+        <button class="btn-round btn-stop" id="stop-btn" aria-label="Зупинити сесію">⏹</button>
+        <span class="control-label">Стоп</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUMMARY SCREEN -->
+  <div class="screen" id="screen-summary">
+    <div class="glass-card summary-card">
+      <h2>Сесію завершено 🌿</h2>
+      <div class="stat-row">
+        <div class="stat"><span id="sum-minutes">0</span><label>хвилин</label></div>
+        <div class="stat"><span id="sum-cycles">0</span><label>циклів дихання</label></div>
+      </div>
+      <p class="sum-technique" id="sum-technique"></p>
+      <blockquote id="quote-text"></blockquote>
+      <cite id="quote-author"></cite>
+      <button class="btn-primary" id="restart-btn">Нова сесія</button>
+    </div>
+  </div>
+
+</div>
+<audio id="bg-audio" loop aria-hidden="true"></audio>
+
+<script>
+(function(){
+  // ---------- DATA ----------
+  var SOUNDS = [
+    {id:'aurora', name:'Аврора', file:'aurora.mp3', ic:'🌌'},
+    {id:'bells', name:'Дзвони', file:'bells.mp3', ic:'🔔'},
+    {id:'birds', name:'Птахи', file:'birds.mp3', ic:'🐦'},
+    {id:'crystal', name:'Кристал', file:'crystal.mp3', ic:'💎'},
+    {id:'dawn', name:'Світанок', file:'space.mp3', ic:'🌅'},
+    {id:'fire', name:'Вогонь', file:'fire.mp3', ic:'🔥'},
+    {id:'forest', name:'Ліс', file:'forest.mp3', ic:'🌲'},
+    {id:'memoirs', name:'Спогади', file:'memoirs.mp3', ic:'🕰️'},
+    {id:'ocean', name:'Океан', file:'ocean.mp3', ic:'🌊'},
+    {id:'radiance', name:'Сяйво', file:'radiance.mp3', ic:'✨'},
+    {id:'rain', name:'Дощ', file:'rain.mp3', ic:'🌧️'},
+    {id:'space', name:'Космос', file:'dawn.mp3', ic:'🪐'},
+    {id:'spring', name:'Весна', file:'spring.mp3', ic:'🌸'},
+    {id:'stars', name:'Зірки', file:'stars.mp3', ic:'⭐'}
+  ];
+  var AUDIO_BASE = 'https://archive.org/download/aurora_202606/';
+
+  var TECHNIQUES = [
+    {id:1, name:'4-6 · Засинання', desc:'Вдих 4с / видих 6с', phases:[
+      {name:'Вдих', dur:4, color:'red'}, {name:'Видих', dur:6, color:'blue'}
+    ]},
+    {id:2, name:'4-4-4-4 · Гармонія', desc:'Вдих 4с / затримка 4с / видих 4с / затримка 4с', phases:[
+      {name:'Вдих', dur:4, color:'red'}, {name:'Затримка', dur:4, color:'yellow'},
+      {name:'Видих', dur:4, color:'blue'}, {name:'Затримка', dur:4, color:'yellow'}
+    ]},
+    {id:3, name:'4-4-6-4 · Стабілізація', desc:'Вдих 4с / затримка 4с / видих 6с / затримка 4с', phases:[
+      {name:'Вдих', dur:4, color:'red'}, {name:'Затримка', dur:4, color:'yellow'},
+      {name:'Видих', dur:6, color:'blue'}, {name:'Затримка', dur:4, color:'yellow'}
+    ]},
+    {id:4, name:'4-7-8 · Антистрес', desc:'Вдих 4с / затримка 7с / видих 8с', phases:[
+      {name:'Вдих', dur:4, color:'red'}, {name:'Затримка', dur:7, color:'yellow'},
+      {name:'Видих', dur:8, color:'blue'}
+    ]}
+  ];
+
+  var QUOTES = [
+    {text:'Спокій приходить зсередини — не шукай його зовні.', author:'— за мотивами вчення Будди'},
+    {text:'Вдих заспокоює тіло, видих відпускає тривогу.', author:'— за мотивами Тіч Нат Хана'},
+    {text:'У тиші ми чуємо те, що галас завжди приховує.', author:'— за мотивами Германа Гессе'},
+    {text:'Природа не поспішає, та все встигає.', author:'— за мотивами Лао-Цзи'},
+    {text:'Володіти своїм диханням — це початок володіти собою.', author:'— за мотивами стоїчної філософії'},
+    {text:'Спокійний розум бачить шлях, де тривожний бачить лише перешкоди.', author:'— східна мудрість'}
+  ];
+
+  var COLOR_MAP = {red:'var(--red)', yellow:'var(--yellow)', blue:'var(--blue)'};
+  var CIRC = 2 * Math.PI * 90;
+
+  // ---------- STATE ----------
+  var state = {
+    duration:null, soundId:null, techniqueId:null,
+    phaseIdx:0, phaseRemaining:0, elapsed:0, cycles:0,
+    paused:false, timer:null, lastScale:1
+  };
+  var streakCount = 0;
+  var lastStreakDay = null;
+  // Відновлюємо стрік зі сховища (інакше лічильник скидався при кожному перезавантаженні)
+  try {
+    var savedStreak = localStorage.getItem('spokiy_streak');
+    var savedDay = localStorage.getItem('spokiy_lastDay');
+    if(savedStreak !== null) streakCount = parseInt(savedStreak, 10) || 0;
+    if(savedDay !== null) lastStreakDay = savedDay;
+  } catch(e){ /* localStorage недоступний — працюємо в межах сесії */ }
+
+  // ---------- DOM ----------
+  var durationRow = document.getElementById('duration-row');
+  var soundGrid = document.getElementById('sound-grid');
+  var techList = document.getElementById('technique-list');
+  var startBtn = document.getElementById('start-btn');
+  var bgAudio = document.getElementById('bg-audio');
+
+  // build duration chips
+  [5,10,15,20].forEach(function(v){
+    var b = document.createElement('button');
+    b.className = 'chip'; b.dataset.val = v; b.textContent = v + ' хв';
+    b.setAttribute('aria-pressed', 'false');
+    b.onclick = function(){
+      Array.prototype.forEach.call(durationRow.children, function(c){ c.classList.remove('selected'); c.setAttribute('aria-pressed','false'); });
+      b.classList.add('selected');
+      b.setAttribute('aria-pressed', 'true');
+      state.duration = v;
+      checkReady();
+    };
+    durationRow.appendChild(b);
+  });
+
+  // build sound grid
+  SOUNDS.forEach(function(s){
+    var b = document.createElement('button');
+    b.className = 'sound-btn'; b.dataset.id = s.id;
+    b.innerHTML = '<span class="ic" aria-hidden="true">'+s.ic+'</span><span>'+s.name+'</span>';
+    b.setAttribute('aria-pressed', 'false');
+    b.onclick = function(){
+      Array.prototype.forEach.call(soundGrid.children, function(c){ c.classList.remove('selected'); c.setAttribute('aria-pressed','false'); });
+      b.classList.add('selected');
+      b.setAttribute('aria-pressed', 'true');
+      state.soundId = s.id;
+      checkReady();
+    };
+    soundGrid.appendChild(b);
+  });
+
+  // build technique list
+  TECHNIQUES.forEach(function(t){
+    var card = document.createElement('div');
+    card.className = 'tech-card'; card.dataset.id = t.id;
+    card.setAttribute('role', 'button');
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('aria-pressed', 'false');
+    card.innerHTML = '<div class="t-name">'+t.name+'</div><div class="t-desc">'+t.desc+'</div>';
+    var select = function(){
+      Array.prototype.forEach.call(techList.children, function(c){ c.classList.remove('selected'); c.setAttribute('aria-pressed','false'); });
+      card.classList.add('selected');
+      card.setAttribute('aria-pressed', 'true');
+      state.techniqueId = t.id;
+      checkReady();
+    };
+    card.onclick = select;
+    card.onkeydown = function(e){
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); select(); }
+    };
+    techList.appendChild(card);
+  });
+
+  function checkReady(){
+    startBtn.disabled = !(state.duration && state.soundId && state.techniqueId);
+  }
+
+  function showScreen(id){
+    document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+    document.getElementById(id).classList.add('active');
+  }
+
+  // ---------- SESSION LOGIC ----------
+  var ringEl = document.getElementById('ring-progress');
+  var circleEl = document.getElementById('breath-circle');
+  var labelEl = document.getElementById('phase-label');
+  var countEl = document.getElementById('phase-count');
+  var techLabelEl = document.getElementById('technique-label');
+  var timeRemEl = document.getElementById('time-remaining');
+  var pauseBtn = document.getElementById('pause-btn');
+
+  function getTechnique(){ return TECHNIQUES.filter(function(t){return t.id===state.techniqueId;})[0]; }
+  function getSound(){ return SOUNDS.filter(function(s){return s.id===state.soundId;})[0]; }
+
+  function fmtTime(sec){
+    sec = Math.max(0, sec);
+    var m = Math.floor(sec/60), s = sec%60;
+    return (m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+  }
+
+  function startPhase(idx, tech){
+    state.phaseIdx = idx;
+    var ph = tech.phases[idx];
+    state.phaseRemaining = ph.dur;
+    labelEl.textContent = ph.name;
+    countEl.textContent = ph.dur;
+
+    // ring animation
+    ringEl.style.transition = 'none';
+    ringEl.style.strokeDashoffset = CIRC;
+    ringEl.style.stroke = COLOR_MAP[ph.color];
+    void ringEl.offsetWidth; // reflow
+    ringEl.style.transition = 'stroke-dashoffset ' + ph.dur + 's linear';
+    ringEl.style.strokeDashoffset = 0;
+
+    // breath circle scale + glow
+    var glow = ph.color==='red' ? 'rgba(232,115,106,0.4)' : ph.color==='blue' ? 'rgba(106,171,232,0.4)' : 'rgba(232,196,104,0.4)';
+    if(ph.color === 'red'){
+      circleEl.style.transition = 'transform '+ph.dur+'s ease-in-out, box-shadow 0.4s ease';
+      circleEl.style.transform = 'scale(1.22)';
+      state.lastScale = 1.22;
+    } else if(ph.color === 'blue'){
+      circleEl.style.transition = 'transform '+ph.dur+'s ease-in-out, box-shadow 0.4s ease';
+      circleEl.style.transform = 'scale(1)';
+      state.lastScale = 1;
+    } else {
+      circleEl.style.transition = 'box-shadow 0.4s ease';
+      circleEl.style.transform = 'scale('+state.lastScale+')';
+    }
+    circleEl.style.boxShadow = '0 0 40px '+glow+', inset 0 1px 0 rgba(255,255,255,0.15)';
+  }
+
+  function tick(){
+    if(state.paused) return;
+    var tech = getTechnique();
+    state.elapsed++;
+    timeRemEl.textContent = fmtTime(state.duration*60 - state.elapsed);
+
+    state.phaseRemaining--;
+    if(state.phaseRemaining > 0){
+      countEl.textContent = state.phaseRemaining;
+    } else {
+      var nextIdx = (state.phaseIdx + 1) % tech.phases.length;
+      if(nextIdx === 0){
+        state.cycles++;
+        if(state.elapsed >= state.duration*60){
+          endSession(true);
+          return;
+        }
+      }
+      startPhase(nextIdx, tech);
+    }
+  }
+
+  function startSession(){
+    var tech = getTechnique();
+    var sound = getSound();
+    techLabelEl.textContent = tech.name;
+    state.phaseIdx = 0; state.elapsed = 0; state.cycles = 0; state.paused = false; state.lastScale = 1;
+    timeRemEl.textContent = fmtTime(state.duration*60);
+    pauseBtn.textContent = '⏸';
+
+    bgAudio.src = AUDIO_BASE + sound.file;
+    bgAudio.loop = true;
+    bgAudio.volume = 0.6;
+    bgAudio.play().catch(function(){ /* autoplay may require gesture; start button click satisfies this */ });
+
+    startPhase(0, tech);
+    showScreen('screen-session');
+
+    if(state.timer) clearInterval(state.timer);
+    state.timer = setInterval(tick, 1000);
+  }
+
+  function endSession(natural){
+    clearInterval(state.timer);
+    bgAudio.pause();
+    bgAudio.currentTime = 0;
+
+    var tech = getTechnique();
+    var minutes = Math.round(state.elapsed/60);
+    document.getElementById('sum-minutes').textContent = minutes;
+    document.getElementById('sum-cycles').textContent = state.cycles;
+    document.getElementById('sum-technique').textContent = 'Техніка: ' + tech.name;
+
+    var q = QUOTES[Math.floor(Math.random()*QUOTES.length)];
+    document.getElementById('quote-text').textContent = '«' + q.text + '»';
+    document.getElementById('quote-author').textContent = q.author;
+
+    updateStreak();
+    showScreen('screen-summary');
+  }
+
+  function updateStreak(){
+    var today = new Date().toDateString();
+    if(lastStreakDay !== today){
+      if(lastStreakDay){
+        var prev = new Date(lastStreakDay);
+        var diff = (new Date(today) - prev) / 86400000;
+        streakCount = diff === 1 ? streakCount + 1 : 1;
+      } else {
+        streakCount = 1;
+      }
+      lastStreakDay = today;
+      try {
+        localStorage.setItem('spokiy_streak', String(streakCount));
+        localStorage.setItem('spokiy_lastDay', today);
+      } catch(e){ /* localStorage недоступний */ }
+    }
+    updateStreakDisplay();
+  }
+
+  function updateStreakDisplay(){
+    var label;
+    var mod10 = streakCount % 10, mod100 = streakCount % 100;
+    if(mod10 === 1 && mod100 !== 11) label = ' день';
+    else if(mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) label = ' дні';
+    else label = ' днів';
+    document.getElementById('streak-text').textContent = 'Тривалість: ' + streakCount + label;
+  }
+
+  // ---------- EVENTS ----------
+  updateStreakDisplay(); // показуємо відновлений стрік на старті
+  document.getElementById('start-btn').onclick = startSession;
+
+  function freezeVisuals(){
+    // Заморожуємо CSS-transition на поточному стані, щоб коло й кільце не "тікали" під час паузи
+    var ringNow = getComputedStyle(ringEl).strokeDashoffset;
+    ringEl.style.transition = 'none';
+    ringEl.style.strokeDashoffset = ringNow;
+    var circNow = getComputedStyle(circleEl).transform;
+    circleEl.style.transition = 'none';
+    circleEl.style.transform = (circNow && circNow !== 'none') ? circNow : 'scale('+state.lastScale+')';
+  }
+
+  function resumeVisuals(){
+    var tech = getTechnique();
+    var ph = tech.phases[state.phaseIdx];
+    var rem = Math.max(1, state.phaseRemaining);
+    void ringEl.offsetWidth; // reflow
+    ringEl.style.transition = 'stroke-dashoffset ' + rem + 's linear';
+    ringEl.style.strokeDashoffset = 0;
+    if(ph.color === 'red'){
+      circleEl.style.transition = 'transform '+rem+'s ease-in-out, box-shadow 0.4s ease';
+      circleEl.style.transform = 'scale(1.22)';
+    } else if(ph.color === 'blue'){
+      circleEl.style.transition = 'transform '+rem+'s ease-in-out, box-shadow 0.4s ease';
+      circleEl.style.transform = 'scale(1)';
+    } else {
+      circleEl.style.transition = 'box-shadow 0.4s ease';
+      circleEl.style.transform = 'scale('+state.lastScale+')';
+    }
+  }
+
+  pauseBtn.onclick = function(){
+    state.paused = !state.paused;
+    pauseBtn.textContent = state.paused ? '▶' : '⏸';
+    pauseBtn.setAttribute('aria-label', state.paused ? 'Продовжити' : 'Пауза');
+    pauseBtn.nextElementSibling.textContent = state.paused ? 'Продовжити' : 'Пауза';
+    if(state.paused){ bgAudio.pause(); freezeVisuals(); }
+    else { bgAudio.play().catch(function(){}); resumeVisuals(); }
+  };
+
+  document.getElementById('stop-btn').onclick = function(){ endSession(false); };
+
+  document.getElementById('restart-btn').onclick = function(){ showScreen('screen-setup'); };
+
+  // ---------- PARTICLES BACKGROUND ----------
+  var canvas = document.getElementById('particles');
+  var ctx = canvas.getContext('2d');
+  var particles = [];
+
+  function resize(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+
+  for(var i=0;i<40;i++){
+    particles.push({
+      x: Math.random()*canvas.width,
+      y: Math.random()*canvas.height,
+      r: Math.random()*2 + 0.5,
+      speed: Math.random()*0.4 + 0.1,
+      drift: Math.random()*0.6 - 0.3,
+      gold: Math.random() > 0.8,
+      alpha: Math.random()*0.4 + 0.1
+    });
+  }
+
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function animateParticles(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(function(p){
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      ctx.fillStyle = p.gold ? 'rgba(224,184,112,'+p.alpha+')' : 'rgba(150,210,180,'+p.alpha+')';
+      ctx.fill();
+      p.y -= p.speed;
+      p.x += p.drift;
+      if(p.y < -10){ p.y = canvas.height + 10; p.x = Math.random()*canvas.width; }
+    });
+    requestAnimationFrame(animateParticles);
+  }
+  // Поважаємо prefers-reduced-motion: не запускаємо анімований фон
+  if(!reduceMotion){ animateParticles(); }
+
+})();
+</script>
+
+<!-- ============ TELEGRAM MINI APP — ЗАХИСТ ДОСТУПУ ============ -->
+<script>
+(function(){
+  var gate   = document.getElementById('gate');
+  var gIcon  = document.getElementById('gate-icon');
+  var gTitle = document.getElementById('gate-title');
+  var gMsg   = document.getElementById('gate-msg');
+  var gClose = document.getElementById('gate-close');
+
+  function showGate(icon, title, msg, showClose){
+    gIcon.textContent  = icon;
+    gTitle.textContent = title;
+    gMsg.textContent   = msg;
+    gClose.style.display = showClose ? 'inline-block' : 'none';
+    gate.classList.remove('hidden');
+    document.body.classList.remove('access-granted');
+  }
+
+  function grantAccess(){
+    gate.classList.add('hidden');
+    document.body.classList.add('access-granted');
+  }
+
+  // --- Верифікація оплати через сервер ---
+  // Надсилає initData на сервер, який ПОВИНЕН:
+  //   1) звірити підпис Telegram (HMAC-SHA256 з ключем на базі токена бота),
+  //   2) перевірити статус оплати користувача (Zenedu / власна БД),
+  //   3) повернути JSON { access: true | false }.
+  //
+  // 🔧 НАЛАШТУВАННЯ: підстав реальну адресу свого сервера замість VERIFY_URL.
+  var VERIFY_URL = 'https://YOUR_SERVER/verify';
+
+  async function verifyAccess(initData){
+    // Поки сервер не підключено — працює як заглушка (повертає true).
+    // Після налаштування VERIFY_URL видали цей рядок:
+    if(VERIFY_URL.indexOf('YOUR_SERVER') !== -1) return true;
+
+    var res = await fetch(VERIFY_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initData: initData })
+    });
+    if(!res.ok) throw new Error('verify failed: ' + res.status);
+    var data = await res.json();
+    return data.access === true;
+  }
+
+  var tg = window.Telegram && window.Telegram.WebApp;
+
+  // 1) Відкрито НЕ через Telegram (звичайний браузер / прямий лінк):
+  //    немає об'єкта WebApp або відсутні initData від бота
+  if(!tg || !tg.initData){
+    showGate('🔒', 'Доступ обмежений',
+      'Цей застосунок доступний тільки через Telegram-бота.', false);
+    return;
+  }
+
+  // Ініціалізація Mini App: сигнал готовності + розгортання на весь екран
+  try { tg.ready(); tg.expand(); } catch(e){}
+
+  var initData = tg.initData;
+
+  // 2) Перевірка оплати (асинхронно)
+  showGate('⏳', 'Перевірка доступу…', 'Зачекайте, будь ласка.', false);
+
+  verifyAccess(initData).then(function(ok){
+    if(ok){
+      grantAccess();
+    } else {
+      showGate('🔒', 'Доступ не знайдено', 'Зверніться до підтримки.', true);
+      gClose.onclick = function(){ try { tg.close(); } catch(e){} };
+    }
+  }).catch(function(){
+    // Помилка мережі / сервера — доступ не надаємо
+    showGate('⚠️', 'Не вдалося перевірити доступ',
+      'Перевірте зʼєднання та спробуйте ще раз.', true);
+    gClose.onclick = function(){ try { tg.close(); } catch(e){} };
+  });
+})();
+</script>
+</body>
+</html>
